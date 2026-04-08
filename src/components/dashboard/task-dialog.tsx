@@ -55,13 +55,19 @@ export const TaskDialog = ({ open, onOpenChange, onSubmit, initialValues, title 
             <div className='space-y-2.5'>
               <Label className='text-zinc-700 dark:text-zinc-300'>Status</Label>
               <Select value={formik.values.status} onValueChange={value => formik.setFieldValue('status', value)}>
-                <SelectTrigger className='w-full bg-zinc-50/50 shadow-sm dark:bg-zinc-900/50'>
+                <SelectTrigger className='w-full cursor-pointer bg-zinc-50/50 shadow-sm dark:bg-zinc-900/50'>
                   <SelectValue placeholder='Select status' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='Todo'>Todo</SelectItem>
-                  <SelectItem value='In Progress'>In Progress</SelectItem>
-                  <SelectItem value='Done'>Done</SelectItem>
+                  <SelectItem value='Todo' className='cursor-pointer'>
+                    Todo
+                  </SelectItem>
+                  <SelectItem value='In Progress' className='cursor-pointer'>
+                    In Progress
+                  </SelectItem>
+                  <SelectItem value='Done' className='cursor-pointer'>
+                    Done
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -73,9 +79,15 @@ export const TaskDialog = ({ open, onOpenChange, onSubmit, initialValues, title 
                   <SelectValue placeholder='Select priority' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='Low'>Low</SelectItem>
-                  <SelectItem value='Medium'>Medium</SelectItem>
-                  <SelectItem value='High'>High</SelectItem>
+                  <SelectItem value='Low' className='cursor-pointer'>
+                    Low
+                  </SelectItem>
+                  <SelectItem value='Medium' className='cursor-pointer'>
+                    Medium
+                  </SelectItem>
+                  <SelectItem value='High' className='cursor-pointer'>
+                    High
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -84,10 +96,10 @@ export const TaskDialog = ({ open, onOpenChange, onSubmit, initialValues, title 
           <FormField label='Due Date' name='dueDate' type='date' formik={formik} />
 
           <DialogFooter className='-mx-6 mt-6 -mb-6 items-center px-6 py-4 sm:justify-between'>
-            <Button type='button' variant='outline' onClick={() => onOpenChange(false)} className='mb-2 w-full sm:mb-0 sm:w-auto'>
+            <Button type='button' variant='outline' onClick={() => onOpenChange(false)} className='mb-2 w-full cursor-pointer sm:mb-0 sm:w-auto'>
               Cancel
             </Button>
-            <Button type='submit' className='w-full min-w-[120px] shadow-sm sm:w-auto'>
+            <Button type='submit' className='w-full min-w-[120px] cursor-pointer shadow-sm sm:w-auto'>
               {initialValues?.id ? 'Save Changes' : 'Create Task'}
             </Button>
           </DialogFooter>

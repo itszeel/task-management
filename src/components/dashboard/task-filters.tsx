@@ -77,9 +77,9 @@ export function TaskFilters() {
           </Select>
 
           <div className='flex w-full items-center gap-2 sm:w-auto'>
-            <Input type='date' title='Start Due Date' className='w-full sm:w-[140px]' value={dateRange.start} onChange={e => setDateRange(prev => ({ ...prev, start: e.target.value }))} />
+            <Input type='date' title='Start Due Date' className='w-full cursor-pointer sm:w-[140px]' value={dateRange.start} onChange={e => setDateRange(prev => ({ ...prev, start: e.target.value }))} />
             <span className='text-muted-foreground'>-</span>
-            <Input type='date' title='End Due Date' className='w-full sm:w-[140px]' value={dateRange.end} onChange={e => setDateRange(prev => ({ ...prev, end: e.target.value }))} />
+            <Input type='date' title='End Due Date' className='w-full cursor-pointer sm:w-[140px]' value={dateRange.end} onChange={e => setDateRange(prev => ({ ...prev, end: e.target.value }))} />
           </div>
         </div>
       </div>

@@ -62,15 +62,6 @@ const Dashboard = () => {
             <Button variant='outline' onClick={handleLogout} className='cursor-pointer gap-2'>
               <LogOut className='h-4 w-4' /> Log Out
             </Button>
-            <Button
-              onClick={() => {
-                setEditingTask(undefined)
-                setIsDialogOpen(true)
-              }}
-              className='cursor-pointer gap-2 shadow-sm'
-            >
-              <Plus className='h-4 w-4' /> New Task
-            </Button>
           </div>
         </div>
 
@@ -83,14 +74,25 @@ const Dashboard = () => {
         </div>
 
         <Tabs defaultValue='table' className='flex min-h-0 flex-1 flex-col'>
-          <TabsList className='mb-4 grid w-[240px] shrink-0 grid-cols-2'>
-            <TabsTrigger value='table' className='cursor-pointer'>
-              Table
-            </TabsTrigger>
-            <TabsTrigger value='board' className='cursor-pointer'>
-              Board
-            </TabsTrigger>
-          </TabsList>
+          <div className='mb-4 flex shrink-0 items-center justify-between'>
+            <TabsList className='grid w-[240px] grid-cols-2'>
+              <TabsTrigger value='table' className='cursor-pointer'>
+                Table
+              </TabsTrigger>
+              <TabsTrigger value='board' className='cursor-pointer'>
+                Board
+              </TabsTrigger>
+            </TabsList>
+            <Button
+              onClick={() => {
+                setEditingTask(undefined)
+                setIsDialogOpen(true)
+              }}
+              className='cursor-pointer gap-2 shadow-sm'
+            >
+              <Plus className='h-4 w-4' /> New Task
+            </Button>
+          </div>
 
           <TabsContent value='table' className='m-0 min-h-0 flex-1 flex-col overflow-y-auto pb-4 focus-visible:ring-0 focus-visible:outline-none data-[state=active]:flex'>
             <TaskList onEdit={handleEditTask} onDelete={handleDeleteTask} />
