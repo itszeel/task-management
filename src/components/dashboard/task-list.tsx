@@ -1,8 +1,11 @@
+import { useMemo } from 'react'
 import { type TaskValues } from '@/schema/validations'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ClipboardList, Edit2, Trash2, Clock, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { useTasks } from '@/contexts/tasks-context'
+import { TaskPagination } from '@/components/dashboard/task-pagination'
 
 interface TaskListProps {
   tasks: TaskValues[]
@@ -11,6 +14,33 @@ interface TaskListProps {
 }
 
 export function TaskList({ tasks, onEdit, onDelete }: TaskListProps) {
+  const { searchQuery, statusFilter, priorityFilter, dateRange, currentPage, pageSize } = useTasks()
+
+  const filteredTasks = useMemo(() => {
+    return tasks.filter(task => {
+      // status
+      const matchesStatus = statusFilter === 'All' || task.status === statusFilter
+      // priority
+      const matchesPriority = priorityFilter === 'All' || task.priority === priorityFilter
+      // search
+      const query = searchQuery.toLowerCase()
+      const matchesSearch = task.title.toLowerCase().includes(query) || task.description.toLowerCase().includes(query)
+      // date
+      let matchesDate = true
+      if (dateRange.start) matchesDate = matchesDate && task.dueDate >= dateRange.start
+      if (dateRange.end) matchesDate = matchesDate && task.dueDate <= dateRange.end
+
+      return matchesStatus && matchesPriority && matchesSearch && matchesDate
+    })
+  }, [tasks, searchQuery, statusFilter, priorityFilter, dateRange])
+
+  const paginatedTasks = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize
+    return filteredTasks.slice(startIndex, startIndex + pageSize)
+  }, [filteredTasks, currentPage, pageSize])
+
+  const totalPages = Math.ceil(filteredTasks.length / pageSize)
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Todo':
@@ -55,60 +85,66 @@ export function TaskList({ tasks, onEdit, onDelete }: TaskListProps) {
 
   return (
     <div className='overflow-hidden rounded-xl bg-white shadow-xl dark:bg-zinc-900'>
-      <div className='px-6 pt-6 pb-4'>
-        <h2 className='text-xl font-semibold tracking-tight'>Task Overview</h2>
-        <p className='text-sm text-zinc-500 dark:text-zinc-400'>Manage and track your project tasks here.</p>
+      <div className='flex flex-col gap-5 px-6 pt-6 pb-4'>
+        <div className='flex items-center justify-between'>
+          <h2 className='text-xl font-semibold tracking-tight'>Task Overview</h2>
+        </div>
       </div>
+
       <div className='p-0 sm:p-6 sm:pt-0'>
-        {tasks.length === 0 ? (
+        {filteredTasks.length === 0 ? (
           <div className='flex flex-col items-center justify-center py-12 text-center'>
             <div className='mb-4 rounded-full bg-zinc-100 p-4 dark:bg-zinc-800'>
               <ClipboardList className='h-8 w-8 text-zinc-400' />
             </div>
-            <h3 className='text-lg font-medium'>No tasks found</h3>
-            <p className='text-muted-foreground mb-6'>Start by creating your first task above.</p>
+            <h3 className='text-lg font-medium'>{tasks.length === 0 ? 'No tasks found' : 'No matching tasks'}</h3>
+            <p className='text-muted-foreground mb-6'>{tasks.length === 0 ? 'Start by creating your first task above.' : 'Try adjusting your search or filters.'}</p>
           </div>
         ) : (
-          <div className='overflow-x-auto rounded-lg border border-zinc-100 dark:border-zinc-800'>
-            <Table>
-              <TableHeader className='bg-zinc-50/80 dark:bg-zinc-800/50'>
-                <TableRow>
-                  <TableHead className='font-semibold'>Title</TableHead>
-                  <TableHead className='font-semibold'>Status</TableHead>
-                  <TableHead className='font-semibold'>Priority</TableHead>
-                  <TableHead className='font-semibold'>Due Date</TableHead>
-                  <TableHead className='text-right font-semibold'>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tasks.map(task => (
-                  <TableRow key={task.id} className='transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50'>
-                    <TableCell>
-                      <div className='flex flex-col gap-0.5'>
-                        <span className='font-medium'>{task.title}</span>
-                        <span className='text-muted-foreground line-clamp-1 text-xs'>{task.description}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(task.status)}</TableCell>
-                    <TableCell>{getPriorityBadge(task.priority)}</TableCell>
-                    <TableCell className='text-sm font-medium'>
-                      {new Date(task.dueDate).toLocaleDateString()}
-                      {task.dueDate < new Date().toISOString().split('T')[0] && task.status !== 'Done' && <span className='text-destructive mt-1 block text-[10px] font-bold uppercase'>Overdue</span>}
-                    </TableCell>
-                    <TableCell className='text-right'>
-                      <div className='flex justify-end gap-2'>
-                        <Button variant='ghost' size='icon' onClick={() => onEdit(task)} className='h-8 w-8 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30'>
-                          <Edit2 className='h-4 w-4' />
-                        </Button>
-                        <Button variant='ghost' size='icon' onClick={() => task.id && onDelete(task.id)} className='hover:bg-destructive/10 hover:text-destructive h-8 w-8'>
-                          <Trash2 className='h-4 w-4' />
-                        </Button>
-                      </div>
-                    </TableCell>
+          <div className='flex flex-col gap-4'>
+            <div className='overflow-x-auto rounded-lg border border-zinc-100 dark:border-zinc-800'>
+              <Table>
+                <TableHeader className='bg-zinc-50/80 dark:bg-zinc-800/50'>
+                  <TableRow>
+                    <TableHead className='font-semibold'>Title</TableHead>
+                    <TableHead className='font-semibold'>Status</TableHead>
+                    <TableHead className='font-semibold'>Priority</TableHead>
+                    <TableHead className='font-semibold'>Due Date</TableHead>
+                    <TableHead className='text-right font-semibold'>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedTasks.map(task => (
+                    <TableRow key={task.id} className='transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50'>
+                      <TableCell>
+                        <div className='flex flex-col gap-0.5'>
+                          <span className='font-medium'>{task.title}</span>
+                          <span className='text-muted-foreground line-clamp-1 text-xs'>{task.description}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(task.status)}</TableCell>
+                      <TableCell>{getPriorityBadge(task.priority)}</TableCell>
+                      <TableCell className='text-sm font-medium'>
+                        {new Date(task.dueDate).toLocaleDateString()}
+                        {task.dueDate < new Date().toISOString().split('T')[0] && task.status !== 'Done' && <span className='text-destructive mt-1 block text-[10px] font-bold uppercase'>Overdue</span>}
+                      </TableCell>
+                      <TableCell className='text-right'>
+                        <div className='flex justify-end gap-2'>
+                          <Button variant='ghost' size='icon' onClick={() => onEdit(task)} className='h-8 w-8 cursor-pointer hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30'>
+                            <Edit2 className='h-4 w-4' />
+                          </Button>
+                          <Button variant='ghost' size='icon' onClick={() => task.id && onDelete(task.id)} className='hover:bg-destructive/10 hover:text-destructive h-8 w-8 cursor-pointer'>
+                            <Trash2 className='h-4 w-4' />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            <TaskPagination totalPages={totalPages} filteredCount={filteredTasks.length} />
           </div>
         )}
       </div>

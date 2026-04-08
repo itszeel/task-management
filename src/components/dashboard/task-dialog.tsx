@@ -34,10 +34,11 @@ export const TaskDialog = ({ open, onOpenChange, onSubmit, initialValues, title 
     enableReinitialize: true,
   })
 
+  const { resetForm } = formik
   useEffect(() => {
     // Close and reset form when dialog closes
-    if (!open) formik.resetForm()
-  }, [open])
+    if (!open) resetForm()
+  }, [open, resetForm])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

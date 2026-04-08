@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router'
 import Login from '@/pages/login'
 import Dashboard from '@/pages/dashboard'
 import { Toaster } from '@/components/ui/sonner'
+import { TasksProvider } from '@/contexts/tasks-context'
 
 const getIsLoggedIn = () => !!JSON.parse(localStorage.getItem('userInfo') || '{}')?.email
 
@@ -21,7 +22,14 @@ function App() {
         </Route>
 
         <Route element={<ProtectedRoute />}>
-          <Route path='/dashboard' element={<Dashboard />} />
+          <Route
+            path='/dashboard'
+            element={
+              <TasksProvider>
+                <Dashboard />
+              </TasksProvider>
+            }
+          />
         </Route>
 
         <Route path='*' element={<Navigate to={isLoggedIn ? '/dashboard' : '/'} replace />} />

@@ -30,8 +30,9 @@ const SignUp = () => {
           return
         }
 
-        delete values.confirmPassword
-        usersList.push(values)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { confirmPassword, ...storedData } = values
+        usersList.push(storedData)
 
         localStorage.setItem('users', JSON.stringify(usersList))
         setIsLoading(false)

@@ -7,34 +7,12 @@ import { TaskDialog } from '@/components/dashboard/task-dialog'
 import { type TaskValues } from '@/schema/validations'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
 import { TaskList } from '@/components/dashboard/task-list'
+import { TaskFilters } from '@/components/dashboard/task-filters'
+import { useTasks } from '@/contexts/tasks-context'
 
 const Dashboard = () => {
   const navigate = useNavigate()
-  const [tasks, setTasks] = useState<TaskValues[]>(() => {
-    const savedTasks: TaskValues[] = JSON.parse(localStorage.getItem('tasks') || '[]')
-
-    if (savedTasks.length === 0) return []
-
-    const today = new Date().toISOString().split('T')[0]
-    let hasChanges = false
-
-    const updatedTasks = savedTasks.map(task => {
-      if (task.dueDate < today && task.status !== 'Done') {
-        hasChanges = true
-        return { ...task, status: 'Done' as const }
-      }
-      return task
-    })
-
-    if (hasChanges) {
-      localStorage.setItem('tasks', JSON.stringify(updatedTasks))
-      setTimeout(() => {
-        toast.info('Some overdue tasks were automatically marked as Done.')
-      }, 0)
-    }
-
-    return updatedTasks
-  })
+  const { tasks, addTask, updateTask, deleteTask } = useTasks()
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<TaskValues | undefined>(undefined)
@@ -48,30 +26,14 @@ const Dashboard = () => {
   }
 
   const handleCreateOrUpdateTask = (values: TaskValues) => {
-    let updatedTasks: TaskValues[]
-
-    if (values.id) {
-      // Update
-      updatedTasks = tasks.map(t => (t.id === values.id ? values : t))
-      toast.success('Task updated successfully')
-    } else {
-      // Create
-      const newTask = { ...values, id: crypto.randomUUID() }
-      updatedTasks = [...tasks, newTask]
-      toast.success('Task created successfully')
-    }
-
-    setTasks(updatedTasks)
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks))
+    if (values.id) updateTask(values)
+    else addTask(values)
     setIsDialogOpen(false)
     setEditingTask(undefined)
   }
 
   const handleDeleteTask = (id: string) => {
-    const updatedTasks = tasks.filter(t => t.id !== id)
-    setTasks(updatedTasks)
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks))
-    toast.success('Task deleted successfully')
+    deleteTask(id)
   }
 
   const stats = useMemo(() => {
@@ -108,6 +70,8 @@ const Dashboard = () => {
         </div>
 
         <DashboardStats stats={stats} />
+
+        <TaskFilters />
 
         <TaskList
           tasks={tasks}
